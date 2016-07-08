@@ -306,30 +306,11 @@
                                         }
                                     );
 
-                                    if(!introduced) {
-                                        swal(
-                                            {
-                                                title: 'Get ready!',
-                                                text: 'In a moment, all the cards will flip over and you\'ll ' +
-                                                    'have 10 seconds to memorise their positions. Once they ' +
-                                                    'flip back, see how many rhymes you can match up!',
-                                                confirmButtonText: 'Let\'s do this'
-                                            },
-                                            function() {
-                                                scene.find('.card').each(
-                                                    function() {
-                                                        $(this).trigger('play');
-                                                    }
-                                                )
-                                            }
-                                        );
-                                    } else {
-                                        scene.find('.card').each(
-                                            function() {
-                                                $(this).trigger('play');
-                                            }
-                                        )
-                                    }
+                                    scene.find('.card').each(
+                                        function() {
+                                            $(this).trigger('play');
+                                        }
+                                    );
                                 }
                             );
                         }
