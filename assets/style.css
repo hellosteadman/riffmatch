@@ -1,0 +1,209 @@
+body * {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
+}
+
+body {
+    background: url('table.jpg');
+    background-size: cover;
+}
+
+.scene {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    color: #fff;
+    opacity: 0;
+    -webkit-transition: all .3s;
+    -moz-transition: all .3s;
+    transition: all .3s;
+}
+
+.scene .disabled {
+    opacity: .5;
+    cursor: default;
+}
+
+.scene h1 {
+    color: #fff;
+    font-family: 'Open Sans';
+    font-weight: 300;
+    font-size: 36px;
+    text-align: center;
+    line-height: 50%;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.scene h2 {
+    font-family: 'Open Sans';
+    font-weight: 300;
+    font-size: 24px;
+    text-align: center;
+    margin: 15px 0;
+}
+
+.scene.current {
+    opacity: 1;
+}
+
+.scene.past {
+    opacity: 0;
+}
+
+.scene .header {
+    padding: 0 15px;
+    background: #000;
+    color: #999;
+    position: absolute;
+    height: 44px;
+    line-height: 44px;
+    top: 0;
+    right: 0;
+    left: 0;
+}
+
+.scene ul.cards {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    top: 59px;
+    right: 0;
+    bottom: 0;
+    left: 15px;
+    -webkit-perspective: 2000px;
+    -moz-perspective: 2000px;
+    perspective: 2000px;
+}
+
+.scene ul.cards li {
+    list-style-type: none;
+    display: block;
+    float: left;
+    width: 20%;
+    height: 50%;
+    position: relative;
+    -webkit-transition: all .2s ease-in-out;
+    -moz-transition: all .2s ease-in-out;
+    transition: all .2s ease-in-out;
+}
+
+.scene ul.cards li.mousedown {
+    -webkit-transform: scale(.98, .98);
+    -moz-transform: scale(.98, .98);
+    transform: scale(.98, .98);
+}
+
+.scene ul.cards li .card {
+    position: absolute;
+    -webkit-transition: transform 1s;
+    -moz-transition: transform 1s;
+    transition: transform 1s;
+    -webkit-transition-delay: .2s;
+    -moz-transition-delay: .2s;
+    transition-delay: .2s;
+    -webkit-transform-style: preserve-3d;
+    -moz-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+    width: 100%;
+    height: 100%;
+}
+
+.scene ul.cards li .card.flipped {
+    -webkit-transform: rotateY(180deg);
+    -moz-transform: rotateY(180deg);
+    transform: rotateY(180deg);
+}
+
+.scene ul.cards li .card .front, .scene ul.cards li .card .back {
+    position: absolute;
+    border: 15px solid #fff;
+    border-radius: 5px;
+    width: 100%;
+    height: 100%;
+    -webkit-box-shadow: 3px 11px 28px -9px rgba(0,0,0,0.75);
+    -moz-box-shadow: 3px 11px 28px -9px rgba(0,0,0,0.75);
+    box-shadow: 3px 11px 28px -9px rgba(0,0,0,0.75);
+}
+
+.scene ul.cards li .card .front {
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: rotateY(0deg) translateZ(1px);
+    -moz-transform: rotateY(0deg) translateZ(1px);
+    transform: rotateY(0deg) translateZ(1px);
+}
+
+.scene ul.cards li .card .back {
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: rotateY(180deg) translateZ(1px);
+    -moz-transform: rotateY(180deg) translateZ(1px);
+    transform: rotateY(180deg) translateZ(1px);
+}
+
+.scene ul.cards li .card .front .cover {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: url('card-a.jpg');
+}
+
+.scene ul.cards li:nth-child(even) .card .front .cover {
+    background: url('card-b.jpg');
+}
+
+.scene ul.cards li .card .back .lyric, .scene ul.cards li .card .back a {
+    position: absolute;
+    background: #fff;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    font-family: 'Merriweather';
+    font-weight: 200;
+    font-size: 16px;
+    color: #000;
+    display: table;
+    text-decoration: none;
+}
+
+.scene ul.cards li .card .back .lyric p, .scene ul.cards li .card .back a p {
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.scene ul.cards li[data-matched] .card .back .lyric {
+    background: #EDFFF1;
+}
+
+.scene ul.cards li .card .back .lyric img.clef {
+    display: block;
+    position: absolute;
+    width: 24px;
+}
+
+.scene ul.cards li .card .back .lyric img.clef.top {
+    top: 0;
+    right: 0;
+}
+
+.scene ul.cards li .card .back .lyric img.clef.bottom {
+    bottom: 0;
+    left: 0;
+}

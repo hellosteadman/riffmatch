@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Twatter</title>
+        <link rel="stylesheet" href="lib/normalise.css" />
+        <link rel="stylesheet" href="assets/style.css" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:200,300,400,700">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,700">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Merriweather:400,300,200">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/0.5.0/sweet-alert.css">
+
+        <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/0.5.0/sweet-alert.min.js"></script>
+        <script src="lib/plunja.js"></script>
+        <script src="lib/jquery.hashchange.js"></script>
+        <script src="lib/soundmanager.js"></script>
+        <script src="assets/jukebox.js"></script>
+    </head>
+    <body>
+        <div id="stage">
+            <div class="current loading scene">
+                <h1>Loading...</h1>
+            </div>
+        </div>
+
+        <script type="text/html" data-template="songlist">
+            <div class="scene">
+                <h2>Pick a song</h2>
+                <ul class="cards">
+                    {% for song in songs %}
+                        <li>
+                            <div class="card">
+                                <div class="front">
+                                    <div class="cover"></div>
+                                </div>
+
+                                <div class="back">
+                                    <a href="#!/{{ song.url }}">
+                                        <p>{{ song.artist }} - {{ song.title }}</p>
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </script>
+
+        <script type="text/html" data-template="song">
+            <div class="scene">
+                <div class="header">{{ artist }} - {{ title }}</div>
+
+                <ul class="cards">
+                    {% for card in cards %}
+                        <li data-index="{{ card.index }}" data-mp3="{{ card.mp3 }}">
+                            <div class="card">
+                                <div class="front">
+                                    <div class="cover"></div>
+                                </div>
+
+                                <div class="back">
+                                    <div class="lyric">
+                                        <img src="assets/clef.png" class="top clef">
+                                        <p>{{ card.lyric }}</p>
+                                        <img src="assets/clef.png" class="bottom clef">
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </script>
+
+        <script>
+            var DROPBOX_URL = 'https://dl.dropboxusercontent.com/u/[USER_ID]/[PUBLIC_DROPBOX_DIRECTORY]/';
+            var templates = new TemplateRegistry();
+            var introduced = false;
+            var songCount = 0;
+
+            var showScene = function(scene, callback) {
+                var active = $('#stage .scene.current').addClass('past');
+
+                setTimeout(
+                    function() {
+                        active.remove();
+                        var element = $(scene).addClass('current')
+
+                        element.appendTo('#stage');
+                        if(typeof(callback) == 'function') {
+                            callback.apply(element);
+                        }
+                    },
+                    300
+                );
+            };
+
+            var shuffle = function(o) {
+                for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+                return o;
+            };
+
+            var zpad = function(s, len, str) {
+                var ret = s;
+
+                while(ret.length < len) {
+                    ret = str + ret;
+                }
+
+                return ret;
+            };
+
+            var JukeBox = new JukeBoxController().on(
+                'songs',
+                function(songlist) {
+                    songCount = songlist.length;
+                    templates.get('songlist').on('render',
+                        function(element) {
+                            showScene(element,
+                                function() {
+                                    $(this).find('.card').each(
+                                        function(i) {
+                                            var card = $(this);
+
+                                            setTimeout(
+                                                function() {
+                                                    card.addClass('flipped');
+                                                },
+                                                300 * i
+                                            );
+                                        }
+                                    )
+                                }
+                            );
+                        }
+                    ).render(
+                        {
+                            songs: songlist
+                        }
+                    );
+                }
+            ).on('song',
+                function(song) {
+                    var pairs = [];
+                    var cards = [];
+
+                    for(var index in song.pairs) {
+                        pairs.push(
+                            {
+                                index: index,
+                                a: {
+                                    lyric: song.pairs[index].a,
+                                    mp3: song.url + zpad(index, 2, '0') + 'a.mp3'
+                                },
+                                b: {
+                                    lyric: song.pairs[index].b,
+                                    mp3: song.url + zpad(index, 2, '0') + 'b.mp3'
+                                }
+                            }
+                        );
+                    }
+
+                    pairs = shuffle(pairs).slice(0, 5);
+                    for(var i = 0; i < pairs.length; i ++) {
+                        cards.push(
+                            {
+                                index: pairs[i].index,
+                                lyric: pairs[i].a.lyric,
+                                mp3: pairs[i].a.mp3
+                            }
+                        );
+
+                        cards.push(
+                            {
+                                index: pairs[i].index,
+                                lyric: pairs[i].b.lyric,
+                                mp3: pairs[i].b.mp3
+                            }
+                        );
+                    }
+
+                    templates.get('song').on('render',
+                        function(element) {
+                            showScene(element,
+                                function() {
+                                    var scene = $(this);
+
+                                    scene.find('.card').each(
+                                        function(i) {
+                                            var card = $(this);
+                                            var li = card.closest('li');
+                                            var index = li.data('index');
+
+                                            card.height(
+                                                card.parent().height() - 30
+                                            ).width(
+                                                card.parent().width() - 30
+                                            );
+
+                                            var sound = soundManager.createSound(
+                                                {
+                                                    url: DROPBOX_URL + li.data('mp3'),
+                                                    autoLoad: true
+                                                }
+                                            );
+
+                                            var play = function() {
+                                                sound.play();
+                                            };
+
+                                            var match = function() {
+                                                var tries = card.closest('.cards').data('tries');
+                                                var lastChosen = card.closest('.cards').data('last-chosen');
+                                                var cardChosen = typeof(lastChosen) != 'undefined' && lastChosen != null;
+                                                var matchingCard = cardChosen ? (lastChosen == index) : true
+                                                var face = card.hasClass('flipped') ? 'back' : 'front';
+                                                var matched = li.data('matched');
+
+                                                if(matched) {
+                                                    return;
+                                                }
+
+                                                if(typeof(tries) == 'undefined') {
+                                                    tries = 0;
+                                                }
+
+                                                switch(face) {
+                                                    case 'front':
+                                                        card.addClass('flipped');
+
+                                                        if(cardChosen) {
+                                                            console && console.log('We\'re looking for a match for', index);
+                                                            if(!matchingCard) {
+                                                                console && console.log('No match');
+                                                                setTimeout(
+                                                                    function() {
+                                                                        card.closest('.cards').find('li').not(li).not('[data-matched]').find('.card').removeClass('flipped');
+                                                                    },
+                                                                    1000
+                                                                );
+
+                                                                card.closest('.cards').data('last-chosen', index);
+                                                            } else {
+                                                                console && console.log('Match found!');
+                                                                card.closest('.cards').data('last-chosen', null);
+                                                                card.closest('.cards').find('li[data-index="' + index + '"]').attr('data-matched', true);
+                                                                card.off('click', match);
+                                                                card.off('click', play);
+
+                                                                if(!card.closest('.cards').find('li').not('[data-matched]').length) {
+                                                                    swal(
+                                                                        {
+                                                                            title: 'Nice job!',
+                                                                            text: 'You matched all ' + card.closest('.cards').find('li').length + ' cards in ' + tries + ' tries.',
+                                                                            confirmButtonText: 'Deal again'
+                                                                        },
+                                                                        function() {
+                                                                            if(songCount > 1) {
+                                                                                window.location = '.';
+                                                                            } else {
+                                                                                window.location.reload();
+                                                                            }
+                                                                        }
+                                                                    );
+                                                                }
+                                                            }
+
+                                                            tries ++;
+                                                        } else {
+                                                            console && console.log('Looking for a new match');
+                                                            card.closest('.cards').data('last-chosen', index);
+                                                        }
+
+                                                        break;
+
+                                                    case 'back':
+                                                        card.removeClass('flipped');
+                                                        break;
+                                                }
+
+                                                card.closest('.cards').data('tries', tries);
+                                            };
+
+                                            card.on('play',
+                                                function() {
+                                                    setTimeout(
+                                                        function() {
+                                                            card.addClass('flipped');
+                                                            setTimeout(
+                                                                function() {
+                                                                    card.removeClass(
+                                                                        'flipped'
+                                                                    ).on(
+                                                                        'click', match
+                                                                    );
+
+                                                                    card.on('click', play);
+                                                                },
+                                                                10000
+                                                            );
+                                                        },
+                                                        300 * i
+                                                    );
+                                                }
+                                            );
+                                        }
+                                    );
+
+                                    if(!introduced) {
+                                        swal(
+                                            {
+                                                title: 'Get ready!',
+                                                text: 'In a moment, all the cards will flip over and you\'ll ' +
+                                                    'have 10 seconds to memorise their positions. Once they ' +
+                                                    'flip back, see how many rhymes you can match up!',
+                                                confirmButtonText: 'Let\'s do this'
+                                            },
+                                            function() {
+                                                scene.find('.card').each(
+                                                    function() {
+                                                        $(this).trigger('play');
+                                                    }
+                                                )
+                                            }
+                                        );
+                                    } else {
+                                        scene.find('.card').each(
+                                            function() {
+                                                $(this).trigger('play');
+                                            }
+                                        )
+                                    }
+                                }
+                            );
+                        }
+                    ).render(
+                        {
+                            title: song.title,
+                            artist: song.artist,
+                            cards: shuffle(cards)
+                        }
+                    );
+                }
+            );
+
+            $(document).ready(
+                function() {
+                    var load = function() {
+                        var key = window.location.hash ? window.location.hash.substr(3) : 'songs.js';
+                        var jsurl = DROPBOX_URL + key;
+                        var script = document.createElement('script');
+
+                        $('#stage a').attr('disabled', 'disabled').addClass('disabled');
+
+                        script.src = jsurl;
+                        $('body').append(script);
+                    };
+
+                    $(window).on('hashchange',
+                        function() {
+                            load();
+                        }
+                    );
+
+                    $('#stage').click(
+                        function(e) {
+                            var element = $(e.target);
+
+                            if(element.hasClass('disabled')) {
+                                e.preventDefault();
+                                return;
+                            }
+
+                            if(element.closest('.disabled').length) {
+                                e.preventDefault();
+                                return;
+                            }
+                        }
+                    );
+
+                    $('#stage').mousedown(
+                        function(e) {
+                            var element = $(e.target);
+
+                            if(element.hasClass('card')) {
+                                element.closest('li').addClass('mousedown');
+                            } else if(element.closest('.card').length) {
+                                element.closest('li').addClass('mosuedown');
+                            }
+                        }
+                    );
+
+                    $('#stage').mouseup(
+                        function(e) {
+                            var element = $(e.target);
+
+                            if(element.hasClass('card')) {
+                                element.closest('li').removeClass('mousedown');
+                            } else if(element.closest('.card').length) {
+                                element.closest('li').removeClass('mosuedown');
+                            }
+                        }
+                    );
+
+                    soundManager.setup(
+                        {
+                            url: 'lib/swf/',
+                            onready: function() {
+                                load();
+                            }
+                        }
+                    );
+                }
+            );
+        </script>
+    </body>
+</html>
