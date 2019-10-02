@@ -1,12 +1,8 @@
 # Riffmatch
 
-Given a DropBox user ID and a publicly-served directory, this tool will read a
-JSON file listing MP3 sound pairs. The pairs are displayed as cards which the
-user selects, in a musical game of Memory.
+Given a DropBox user ID and a publicly-served directory, this tool will read a JSON file listing MP3 sound pairs. The pairs are displayed as cards which the user selects, in a musical game of Memory.
 
-You start by creating a JukeBox file (called `songs.js`), which contains a list
-of songs. Put each song in its own directory, then create a `song.js` file
-for each, inside that directory. Here's an example of the main `songs.js` file:
+You start by creating a JukeBox file (called `songs.js`), which contains a list of songs. Put each song in its own directory, then create a `song.js` file for each, inside that directory. Here's an example of the main `songs.js` file:
 
 ```javascript
 JukeBox.songs(
@@ -82,7 +78,6 @@ JukeBox.song(
 );
 ```
 
-The MP3s should be placed in the same web-servable directory as that file (
-which should be called `song.js`).
+The MP3s should be placed in the same web-servable directory as that file ( which should be called `song.js`).
 
 Feed the URL of the file - minus the `song.js` bit - into the `index.html`'s `DROPBOX_URL` setting, and you should be good to go.
